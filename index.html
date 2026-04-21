@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ANDRI STORE - Kumpulan script</title>
+    <title>WaBot Hub - Script Repository</title>
     
     <!-- Google Fonts: Open Sans -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -94,6 +94,14 @@
         #msg-box.show {
             transform: translateX(0);
         }
+
+        /* Social Icons */
+        .social-btn {
+            transition: all 0.3s ease;
+        }
+        .social-btn:hover {
+            transform: scale(1.1);
+        }
     </style>
 </head>
 <body class="font-sans antialiased">
@@ -104,7 +112,7 @@
             <div class="flex justify-between h-16 items-center">
                 <div class="flex items-center cursor-pointer" onclick="navigate('home')">
                     <i class="fa-solid fa-robot text-primary text-2xl mr-3"></i>
-                    <span class="font-bold text-xl tracking-wider text-primary">ANDRI STORE</span>
+                    <span class="font-bold text-xl tracking-wider text-primary">WaBot Hub</span>
                 </div>
                 
                 <!-- Desktop Menu -->
@@ -137,8 +145,35 @@
     </main>
 
     <!-- Footer -->
-    <footer class="bg-darker border-t border-primary/20 py-8 text-center text-sm text-gray-400 mt-auto">
-        <p>&copy; 2025-2026 ANDRI STORE. Platform Distribusi Script WhatsApp Bot Untuk Developer Indonesia.</p>
+    <footer class="bg-darker border-t border-primary/20 py-10 mt-auto relative overflow-hidden">
+        <div class="absolute top-0 left-1/2 transform -translate-x-1/2 w-full h-1 bg-gradient-to-r from-transparent via-primary/50 to-transparent"></div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="text-center md:text-left mb-6 md:mb-0">
+                    <h3 class="text-xl font-bold text-white mb-2"><i class="fa-solid fa-robot text-primary mr-2"></i>WaBot Hub</h3>
+                    <p class="text-sm text-gray-400">Platform Distribusi Script WhatsApp Bot Terbaik.</p>
+                    <p class="text-xs text-gray-500 mt-2">&copy; 2026 WaBot Hub. Hak Cipta Dilindungi.</p>
+                </div>
+                
+                <div class="text-center md:text-right">
+                    <p class="text-sm font-semibold text-gray-300 mb-4">Hubungi Developer Kami:</p>
+                    <div class="flex justify-center md:justify-end space-x-4">
+                        <!-- WhatsApp Link (Target to App) -->
+                        <a href="https://wa.me/6281234567890?text=Halo%20Admin%20WaBot%20Hub," target="_blank" rel="noopener noreferrer" class="social-btn bg-[#25D366]/20 text-[#25D366] hover:bg-[#25D366] hover:text-white w-10 h-10 rounded-full flex items-center justify-center border border-[#25D366]/30 shadow-lg" title="WhatsApp Developer">
+                            <i class="fa-brands fa-whatsapp text-xl"></i>
+                        </a>
+                        <!-- Telegram Link (Target to App) -->
+                        <a href="https://t.me/username_telegram_anda" target="_blank" rel="noopener noreferrer" class="social-btn bg-[#0088cc]/20 text-[#0088cc] hover:bg-[#0088cc] hover:text-white w-10 h-10 rounded-full flex items-center justify-center border border-[#0088cc]/30 shadow-lg" title="Telegram Developer">
+                            <i class="fa-brands fa-telegram text-xl"></i>
+                        </a>
+                        <!-- Email Link (Target to Mail Client) -->
+                        <a href="mailto:developer@wabothub.com?subject=Pertanyaan%20Seputar%20WaBot%20Hub" class="social-btn bg-primary/20 text-primary hover:bg-primary hover:text-slate-900 w-10 h-10 rounded-full flex items-center justify-center border border-primary/30 shadow-lg" title="Email Developer">
+                            <i class="fa-solid fa-envelope text-lg"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
     </footer>
 
     <!-- Floating Message Box -->
@@ -153,14 +188,21 @@
         import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, onSnapshot, doc, setDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Firebase Configuration & Initialization
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
-            // Fallback for local testing if needed
+        // Konfigurasi Firebase milik Anda (sc-free-bot)
+        const firebaseConfig = {
+            apiKey: "AIzaSyA6vwKHbFFtNAcsHxXc3LV5JJtwYqCA7Kk",
+            authDomain: "sc-free-bot.firebaseapp.com",
+            projectId: "sc-free-bot",
+            storageBucket: "sc-free-bot.firebasestorage.app",
+            messagingSenderId: "846877969110",
+            appId: "1:846877969110:web:c095a0e0c89ccd2818d777",
+            measurementId: "G-7VJK5V9G2V"
         };
+        
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'wabot-hub-app';
+        const appId = 'wabot-hub-app'; // Menggunakan ID environment untuk routing koleksi
 
         // Global State
         let appState = {
@@ -184,7 +226,7 @@
             mobileMenu.classList.toggle('hidden');
         });
 
-        // Initialize Authentication
+        // Initialize Authentication (Anonymous untuk tamu agar bisa baca database Firestore)
         const initAuth = async () => {
             try {
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
@@ -214,19 +256,13 @@
             // Listen to Scripts
             onSnapshot(scriptsRef, (snapshot) => {
                 appState.scripts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                
-                // Add dummy data if empty for demonstration
-                if (appState.scripts.length === 0) {
-                    addDummyData();
-                } else {
-                    render();
-                }
+                render();
             }, (error) => {
                 console.error("Error fetching scripts:", error);
-                showMessage("Gagal memuat data script", "error");
+                // Matikan notifikasi error sementara jika database kosong / rules belum diatur
             });
 
-            // Listen to Users 
+            // Listen to Users (Simulasi User Custom)
             onSnapshot(usersRef, (snapshot) => {
                 appState.users = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 
@@ -239,25 +275,6 @@
             }, (error) => {
                 console.error("Error fetching users:", error);
             });
-        }
-
-        async function addDummyData() {
-            try {
-                const scriptsRef = collection(db, 'artifacts', appId, 'public', 'data', 'scripts');
-                const dummyId = "script_" + Date.now();
-                await setDoc(doc(scriptsRef, dummyId), {
-                    title: "SCRIPT BOT ANDRI STORE V1",
-                    description: "Script dasar WhatsApp Bot Multi Device menggunakan library Baileys. Dilengkapi dengan fitur antilink, welcome message, dan menu dinamis.\n\nFile di dalam zip meliputi: index.js, package.json, dan folder lib dan sebagainya.",
-                    image: "https://img2.pixhost.to/images/7322/716841492_andri.jpg",
-                    download_link: "https://www.mediafire.com/file/o1yvgnssxjt75vm/ANDRI_STORE_ID_V1.5._YT.zip/file", // External link instead of raw code
-                    author: "ANDRI",
-                    downloads: 1,
-                    views: 1,
-                    created_at: new Date().toISOString()
-                });
-            } catch (e) {
-                console.error("Dummy data fail:", e);
-            }
         }
 
         // Generate UUID
@@ -289,10 +306,10 @@
             const user = appState.users.find(u => u.username === username && u.password === password);
             if (user) {
                 appState.currentUser = user;
-                showMessage(`Selamat datang user, ${user.username}!`, "success");
+                showMessage(`Selamat datang, ${user.username}!`, "success");
                 navigate('home');
             } else {
-                showMessage("Username atau password anda salah!", "error");
+                showMessage("Username atau password salah!", "error");
             }
         };
 
@@ -315,7 +332,7 @@
                     username,
                     email,
                     password, 
-                    role: username.toLowerCase() === 'andri' ? 'andri' : 'user',
+                    role: username.toLowerCase() === 'admin' ? 'admin' : 'user',
                     created_at: new Date().toISOString()
                 };
                 
@@ -325,7 +342,7 @@
                 navigate('home');
             } catch (error) {
                 console.error("Reg error:", error);
-                showMessage("Gagal mendaftar", "error");
+                showMessage("Gagal mendaftar. Pastikan Rules Firestore mengizinkan write.", "error");
             }
         };
 
@@ -357,7 +374,7 @@
                     title,
                     description,
                     image,
-                    download_link, // Save external link
+                    download_link, 
                     author: appState.currentUser.username,
                     downloads: 0,
                     views: 0,
@@ -384,11 +401,19 @@
             }
         };
 
+        // Proteksi Guest untuk melihat detail
         window.viewScriptDetails = async (id) => {
+            if (!appState.currentUser) {
+                showMessage("Akses Ditolak! Anda harus Login atau Daftar untuk melihat detail & mengunduh.", "error");
+                setTimeout(() => {
+                    navigate('login');
+                }, 2000);
+                return;
+            }
+
             const script = appState.scripts.find(s => s.id === id);
             if (!script) return;
 
-            // Increment views
             try {
                 const scriptsRef = collection(db, 'artifacts', appId, 'public', 'data', 'scripts');
                 await updateDoc(doc(scriptsRef, id), {
@@ -399,11 +424,17 @@
             navigate('details', script);
         };
 
+        // Proteksi Download
         window.downloadScript = async (id) => {
+            if (!appState.currentUser) {
+                showMessage("Sesi Anda telah habis. Silakan login kembali.", "error");
+                navigate('login');
+                return;
+            }
+
             const script = appState.scripts.find(s => s.id === id);
             if (!script) return;
 
-            // Increment downloads counter
             try {
                 const scriptsRef = collection(db, 'artifacts', appId, 'public', 'data', 'scripts');
                 await updateDoc(doc(scriptsRef, id), {
@@ -413,21 +444,18 @@
 
             showMessage("Mengarahkan ke halaman unduhan...", "success");
             
-            // Open external link (MediaFire, GDrive, etc.) in a new tab
             setTimeout(() => {
                 window.open(script.download_link, '_blank');
-                // Re-render to update the local counter visually
                 render();
             }, 800);
         };
 
-        // Utility: Format Date
         function formatDate(dateString) {
             const options = { year: 'numeric', month: 'short', day: 'numeric' };
             return new Date(dateString).toLocaleDateString('id-ID', options);
         }
 
-        // Utility: Show Message
+        // Notifikasi Message Box
         let msgTimeout;
         window.showMessage = (text, type = "info") => {
             const box = document.getElementById('msg-box');
@@ -448,7 +476,6 @@
                 icon.className = "fa-solid fa-info-circle text-primary mr-3 text-xl";
             }
 
-            // Trigger animation
             setTimeout(() => box.classList.remove("translate-x-[150%]"), 10);
             
             clearTimeout(msgTimeout);
@@ -456,7 +483,6 @@
                 box.classList.add("translate-x-[150%]");
             }, 3000);
         };
-
 
         // --- Render Functions ---
 
@@ -471,13 +497,13 @@
             if (isLoggedIn) {
                 links += `<button onclick="navigate('upload')" class="text-gray-300 hover:text-primary transition-colors block px-3 py-2">Unggah Script</button>`;
                 if (isAdmin) {
-                    links += `<button onclick="navigate('admin')" class="text-gray-300 hover:text-primary transition-colors block px-3 py-2">Kelola Script</button>`;
+                    links += `<button onclick="navigate('admin')" class="text-gray-300 hover:text-primary transition-colors block px-3 py-2">Kelola (Admin)</button>`;
                 }
                 links += `
                     <div class="flex items-center text-primary px-3 py-2 font-semibold">
                         <i class="fa-regular fa-user mr-2"></i> ${appState.currentUser.username}
                     </div>
-                    <button onclick="logoutAppUser()" class="bg-red-500/20 text-red-400 hover:bg-red-500 hover:text-white px-4 py-2 rounded transition-colors block mx-3 my-2 md:my-0 md:mx-0">Keluar/Out</button>
+                    <button onclick="logoutAppUser()" class="bg-red-500/20 text-red-400 hover:bg-red-500 hover:text-white px-4 py-2 rounded transition-colors block mx-3 my-2 md:my-0 md:mx-0">Keluar</button>
                 `;
             } else {
                 links += `
@@ -495,26 +521,13 @@
             renderNav();
 
             switch (appState.view) {
-                case 'home':
-                    renderHome();
-                    break;
-                case 'upload':
-                    renderUpload();
-                    break;
-                case 'login':
-                    renderLogin();
-                    break;
-                case 'register':
-                    renderRegister();
-                    break;
-                case 'admin':
-                    renderAdmin();
-                    break;
-                case 'details':
-                    renderDetails();
-                    break;
-                default:
-                    renderHome();
+                case 'home': renderHome(); break;
+                case 'upload': renderUpload(); break;
+                case 'login': renderLogin(); break;
+                case 'register': renderRegister(); break;
+                case 'admin': renderAdmin(); break;
+                case 'details': renderDetails(); break;
+                default: renderHome();
             }
         }
 
@@ -525,20 +538,18 @@
             ).sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
             let html = `
-                <!-- Hero / Search Section -->
                 <div class="text-center py-16 mb-10 bg-card rounded-2xl shadow-lg border border-primary/20 relative overflow-hidden">
                     <div class="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-transparent"></div>
                     <div class="relative z-10">
                         <h1 class="text-4xl md:text-5xl font-bold mb-4">Temukan <span class="text-primary">Script Bot WA</span> Terbaik</h1>
-                        <p class="text-gray-400 mb-8 max-w-2xl mx-auto text-lg">Pusat repositori untuk mencari dan mengunduh source code WhatsApp Bot dalam format ZIP dengan mudah aman berkualitas gratis dan aman. Semua script telah diuji.</p>
+                        <p class="text-gray-400 mb-8 max-w-2xl mx-auto text-lg">Pusat repositori untuk mencari, mengunggah, dan mengunduh source code WhatsApp Bot dalam format ZIP dengan mudah dan aman.</p>
                         <div class="max-w-xl mx-auto relative px-4 sm:px-0">
                             <i class="fa-solid fa-search absolute left-8 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                            <input type="text" placeholder="Cari berdasarkan nama script bot" class="w-full input-tech rounded-full py-4 pl-14 pr-6 text-lg shadow-lg" value="${appState.searchQuery}" onkeyup="handleSearch(event)">
+                            <input type="text" placeholder="Cari berdasarkan nama atau deskripsi..." class="w-full input-tech rounded-full py-4 pl-14 pr-6 text-lg shadow-lg" value="${appState.searchQuery}" onkeyup="handleSearch(event)">
                         </div>
                     </div>
                 </div>
 
-                <!-- Scripts Grid -->
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-2xl font-semibold"><i class="fa-solid fa-folder-open text-primary mr-2"></i>Koleksi Script</h2>
                     <span class="text-sm bg-dark px-3 py-1 rounded-full text-primary border border-primary/30">${filteredScripts.length} Tersedia</span>
@@ -547,7 +558,7 @@
                 ${filteredScripts.length === 0 ? `
                     <div class="text-center py-16 text-gray-500 bg-card rounded-xl border border-gray-800 shadow-inner">
                         <i class="fa-solid fa-box-open text-6xl mb-4 text-gray-700"></i>
-                        <p class="text-lg">Belum ada script yang cocok dengan pencarian Anda.</p>
+                        <p class="text-lg">Belum ada script yang diunggah ke database Anda.</p>
                     </div>
                 ` : `
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -558,18 +569,35 @@
                                 </div>
                                 <div class="h-48 overflow-hidden relative group cursor-pointer" onclick="viewScriptDetails('${script.id}')">
                                     <img src="${script.image}" alt="${script.title}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" onerror="this.src='https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'">
-                                    <div class="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <button class="bg-primary text-slate-900 font-bold px-5 py-2 rounded-full shadow-[0_0_15px_rgba(135,206,235,0.4)]"><i class="fa-solid fa-eye mr-2"></i>Detail & Download</button>
+                                    
+                                    <div class="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-sm">
+                                        ${appState.currentUser 
+                                            ? `<button class="bg-primary text-slate-900 font-bold px-5 py-2 rounded-full shadow-[0_0_15px_rgba(135,206,235,0.4)]"><i class="fa-solid fa-eye mr-2"></i>Detail & Download</button>`
+                                            : `<div class="text-center px-4"><i class="fa-solid fa-lock text-3xl text-red-400 mb-2"></i><p class="text-white font-bold text-sm">Login untuk melihat</p></div>`
+                                        }
                                     </div>
                                 </div>
                                 <div class="p-6 flex-grow flex flex-col">
-                                    <h3 class="text-xl font-bold mb-2 hover:text-primary cursor-pointer truncate" onclick="viewScriptDetails('${script.id}')">${script.title}</h3>
-                                    <p class="text-gray-400 text-sm mb-5 line-clamp-2">${script.description}</p>
+                                    <h3 class="text-xl font-bold mb-2 hover:text-primary cursor-pointer truncate" onclick="viewScriptDetails('${script.id}')">
+                                        ${!appState.currentUser ? '<i class="fa-solid fa-lock text-gray-500 text-sm mr-1"></i> ' : ''}${script.title}
+                                    </h3>
+                                    
+                                    ${!appState.currentUser ? `
+                                        <div class="relative">
+                                            <p class="text-gray-400 text-sm mb-5 line-clamp-2 filter blur-[4px] select-none">Ini adalah deskripsi palsu yang digunakan untuk memblur teks aslinya karena pengguna belum melakukan proses login ke dalam sistem.</p>
+                                            <div class="absolute inset-0 flex items-center justify-center">
+                                                <span class="text-xs bg-red-500/20 text-red-300 border border-red-500/30 px-2 py-1 rounded">Konten Terkunci</span>
+                                            </div>
+                                        </div>
+                                    ` : `
+                                        <p class="text-gray-400 text-sm mb-5 line-clamp-2">${script.description}</p>
+                                    `}
+                                    
                                     <div class="mt-auto flex justify-between items-center text-xs font-medium text-gray-500 border-t border-gray-700 pt-4">
                                         <span class="flex items-center"><img src="https://ui-avatars.com/api/?name=${script.author}&background=0D8ABC&color=fff&size=20" class="rounded-full mr-2"> ${script.author}</span>
                                         <div class="space-x-3 bg-dark px-3 py-1 rounded-full">
-                                            <span title="Dilihat"><i class="fa-solid fa-eye text-primary/70"></i> ${script.views || 0}</span>
-                                            <span title="Diunduh"><i class="fa-solid fa-download text-green-400/70"></i> ${script.downloads || 0}</span>
+                                            <span title="Dilihat"><i class="fa-solid fa-eye text-primary/70"></i> ${appState.currentUser ? (script.views || 0) : '?'}</span>
+                                            <span title="Diunduh"><i class="fa-solid fa-download text-green-400/70"></i> ${appState.currentUser ? (script.downloads || 0) : '?'}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -585,22 +613,20 @@
             container.innerHTML = `
                 <div class="max-w-3xl mx-auto bg-card p-8 md:p-10 rounded-2xl shadow-xl border border-primary/20">
                     <h2 class="text-3xl font-bold mb-2"><i class="fa-solid fa-cloud-arrow-up text-primary mr-3"></i>Bagikan Script Anda</h2>
-                    <p class="text-gray-400 mb-8 border-b border-gray-700 pb-6"> tempelkan linknya di sini url.</p>
+                    <p class="text-gray-400 mb-8 border-b border-gray-700 pb-6">Upload file source code bot WA Anda ke layanan hosting, lalu tempelkan linknya di sini.</p>
                     
                     <form onsubmit="uploadScript(event)" class="space-y-6">
                         <div>
                             <label class="block text-sm font-medium text-gray-300 mb-2">Judul Script *</label>
                             <input type="text" name="title" required class="w-full input-tech rounded-lg py-3 px-4" placeholder="Misal: Script Bot Store MD V3.0">
                         </div>
-                        
                         <div>
                             <label class="block text-sm font-medium text-gray-300 mb-2">Deskripsi Detail *</label>
                             <textarea name="description" required rows="4" class="w-full input-tech rounded-lg py-3 px-4" placeholder="Jelaskan fitur-fitur bot, cara install, dan library yang digunakan..."></textarea>
                         </div>
-                        
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <label class="block text-sm font-medium text-gray-300 mb-2">Link Unduhan url MediaFire *</label>
+                                <label class="block text-sm font-medium text-gray-300 mb-2">Link Unduhan (MediaFire / GDrive) *</label>
                                 <div class="relative">
                                     <i class="fa-solid fa-link absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
                                     <input type="url" name="download_link" required class="w-full input-tech rounded-lg py-3 pl-12 pr-4" placeholder="https://mediafire.com/file/...">
@@ -614,15 +640,9 @@
                                 </div>
                             </div>
                         </div>
-
-                        <div class="bg-primary/10 border border-primary/20 rounded-lg p-4 mt-4 text-sm text-primary flex items-start">
-                            <i class="fa-solid fa-circle-info mt-1 mr-3 text-lg"></i>
-                            <p>Pastikan link unduhan yang Anda berikan bersifat publik agar pengguna lain dapat mengunduh file ZIP tanpa kendala perizinan.</p>
-                        </div>
-                        
                         <div class="flex justify-end pt-6 border-t border-gray-700">
                             <button type="button" onclick="navigate('home')" class="mr-4 px-6 py-3 rounded-lg text-gray-400 hover:text-white transition-colors font-semibold">Batal</button>
-                            <button type="submit" class="bg-primary text-slate-900 font-bold px-8 py-3 rounded-lg hover:bg-sky-300 transition-all shadow-[0_0_15px_rgba(135,206,235,0.4)] hover:shadow-[0_0_25px_rgba(135,206,235,0.6)]"><i class="fa-solid fa-paper-plane mr-2"></i> Publikasikan</button>
+                            <button type="submit" class="bg-primary text-slate-900 font-bold px-8 py-3 rounded-lg hover:bg-sky-300 transition-all shadow-[0_0_15px_rgba(135,206,235,0.4)]"><i class="fa-solid fa-paper-plane mr-2"></i> Publikasikan</button>
                         </div>
                     </form>
                 </div>
@@ -632,13 +652,12 @@
         function renderLogin() {
             container.innerHTML = `
                 <div class="max-w-md mx-auto mt-12 bg-card p-8 rounded-2xl shadow-xl border border-primary/20 relative overflow-hidden">
-                    <div class="absolute -top-10 -right-10 text-primary/5 text-9xl"><i class="fa-solid fa-right-to-bracket"></i></div>
                     <div class="text-center mb-8 relative z-10">
                         <div class="bg-dark w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 border border-primary/30">
                             <i class="fa-solid fa-user-lock text-3xl text-primary"></i>
                         </div>
                         <h2 class="text-3xl font-bold">Masuk</h2>
-                        <p class="text-gray-400 mt-2">Masuk untuk mulai berbagi script</p>
+                        <p class="text-gray-400 mt-2">Masuk untuk melihat dan mengunduh script</p>
                     </div>
                     <form onsubmit="loginAppUser(event)" class="space-y-5 relative z-10">
                         <div>
@@ -670,16 +689,14 @@
                             <i class="fa-solid fa-user-plus text-3xl text-primary"></i>
                         </div>
                         <h2 class="text-3xl font-bold">Daftar Akun</h2>
-                        <p class="text-gray-400 mt-2">Bergabung dengan ANDRI STORE</p>
                     </div>
                     <form onsubmit="registerAppUser(event)" class="space-y-4 relative z-10">
                         <div>
                             <label class="block text-sm font-medium text-gray-300 mb-1">Username</label>
                             <div class="relative">
                                 <i class="fa-solid fa-user absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500"></i>
-                                <input type="text" name="username" required pattern="[a-zA-Z0-9]+" title="Hanya huruf dan angka tanpa spasi" class="w-full input-tech rounded-lg py-3 pl-12 pr-4 bg-dark/50" placeholder="Pilih username unik">
+                                <input type="text" name="username" required pattern="[a-zA-Z0-9]+" class="w-full input-tech rounded-lg py-3 pl-12 pr-4 bg-dark/50" placeholder="Pilih username unik">
                             </div>
-                            <p class="text-xs text-primary/80 mt-1">*Note jangan lupa dengan data anda.</p>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-300 mb-1">Email</label>
@@ -703,8 +720,7 @@
         }
 
         function renderAdmin() {
-            if (!appState.currentUser || appState.currentUser.role !== 'andri') {
-                showMessage("Akses ditolak! Anda bukan admin.", "error");
+            if (!appState.currentUser || appState.currentUser.role !== 'admin') {
                 navigate('home');
                 return;
             }
@@ -715,8 +731,7 @@
                 <div class="bg-card p-6 md:p-8 rounded-2xl shadow-xl border border-primary/20">
                     <div class="flex flex-col md:flex-row justify-between items-center mb-8 pb-4 border-b border-gray-700">
                         <div>
-                            <h2 class="text-3xl font-bold"><i class="fa-solid fa-shield-halved text-primary mr-3"></i>Khusus Admin</h2>
-                            <p class="text-gray-400 mt-1">Kelola data repositori script</p>
+                            <h2 class="text-3xl font-bold"><i class="fa-solid fa-shield-halved text-primary mr-3"></i>Panel Admin</h2>
                         </div>
                         <div class="mt-6 md:mt-0 flex gap-4 text-center w-full md:w-auto">
                             <div class="bg-dark flex-1 md:flex-none px-6 py-3 rounded-xl border border-gray-700">
@@ -737,33 +752,21 @@
                                     <th class="px-6 py-4 font-semibold">Script Info</th>
                                     <th class="px-6 py-4 font-semibold">Uploader</th>
                                     <th class="px-6 py-4 font-semibold">Statistik</th>
-                                    <th class="px-6 py-4 font-semibold">Link Tautan</th>
                                     <th class="px-6 py-4 font-semibold text-right">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-800">
-                                ${scripts.length === 0 ? `<tr><td colspan="5" class="text-center py-10 text-gray-500">Tidak ada data script di repositori.</td></tr>` : ''}
+                                ${scripts.length === 0 ? `<tr><td colspan="4" class="text-center py-10 text-gray-500">Belum ada data script.</td></tr>` : ''}
                                 ${scripts.map(script => `
                                     <tr class="hover:bg-card transition-colors">
                                         <td class="px-6 py-4">
-                                            <div class="font-bold text-white max-w-[250px] truncate" title="${script.title}">${script.title}</div>
-                                            <div class="text-xs text-gray-500 mt-1">Dibuat: ${formatDate(script.created_at)}</div>
+                                            <div class="font-bold text-white max-w-[250px] truncate">${script.title}</div>
+                                            <div class="text-xs text-gray-500 mt-1">${formatDate(script.created_at)}</div>
                                         </td>
-                                        <td class="px-6 py-4">
-                                            <span class="bg-card border border-gray-700 text-gray-300 px-3 py-1.5 rounded-full text-xs flex items-center w-max"><img src="https://ui-avatars.com/api/?name=${script.author}&background=0D8ABC&color=fff&size=16" class="rounded-full mr-2"> ${script.author}</span>
-                                        </td>
-                                        <td class="px-6 py-4">
-                                            <div class="flex space-x-4 text-xs font-medium">
-                                                <span class="text-gray-400 bg-gray-800 px-2 py-1 rounded"><i class="fa-solid fa-eye text-primary mr-1"></i> ${script.views || 0}</span>
-                                                <span class="text-gray-400 bg-gray-800 px-2 py-1 rounded"><i class="fa-solid fa-download text-green-400 mr-1"></i> ${script.downloads || 0}</span>
-                                            </div>
-                                        </td>
-                                        <td class="px-6 py-4">
-                                            <a href="${script.download_link}" target="_blank" class="text-blue-400 hover:text-blue-300 flex items-center text-xs bg-blue-500/10 px-3 py-1.5 rounded-full w-max"><i class="fa-solid fa-external-link-alt mr-2"></i> Cek Link</a>
-                                        </td>
+                                        <td class="px-6 py-4">${script.author}</td>
+                                        <td class="px-6 py-4">View: ${script.views || 0} | DL: ${script.downloads || 0}</td>
                                         <td class="px-6 py-4 text-right">
-                                            <button onclick="viewScriptDetails('${script.id}')" class="text-gray-400 hover:text-primary mr-3 p-2 rounded-lg hover:bg-gray-800 transition-colors" title="Lihat"><i class="fa-solid fa-eye"></i></button>
-                                            <button onclick="deleteScript('${script.id}')" class="text-red-500 hover:text-red-400 p-2 rounded-lg hover:bg-red-500/10 transition-colors" title="Hapus"><i class="fa-solid fa-trash"></i></button>
+                                            <button onclick="deleteScript('${script.id}')" class="text-red-500 hover:text-red-400 p-2"><i class="fa-solid fa-trash"></i></button>
                                         </td>
                                     </tr>
                                 `).join('')}
@@ -776,6 +779,11 @@
         }
 
         function renderDetails() {
+            if (!appState.currentUser) {
+                navigate('home');
+                return;
+            }
+
             const script = appState.currentData;
             if (!script) {
                 navigate('home');
@@ -784,50 +792,30 @@
 
             container.innerHTML = `
                 <div class="mb-6">
-                    <button onclick="navigate('home')" class="text-gray-400 hover:text-primary transition-colors font-medium bg-card px-4 py-2 rounded-lg border border-gray-800 shadow-sm"><i class="fa-solid fa-arrow-left mr-2"></i> Kembali/Back</button>
+                    <button onclick="navigate('home')" class="text-gray-400 hover:text-primary transition-colors font-medium bg-card px-4 py-2 rounded-lg border border-gray-800 shadow-sm"><i class="fa-solid fa-arrow-left mr-2"></i> Kembali ke Daftar</button>
                 </div>
 
                 <div class="bg-card rounded-2xl shadow-2xl border border-primary/20 overflow-hidden">
                     <div class="md:flex">
-                        <!-- Image Section -->
                         <div class="md:w-5/12 h-72 md:h-auto relative bg-darker">
                             <img src="${script.image}" alt="${script.title}" class="w-full h-full object-cover" onerror="this.src='https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'">
-                            <div class="absolute top-6 left-6 bg-darker/90 backdrop-blur-md px-4 py-1.5 rounded-lg text-sm font-bold text-primary border border-primary/30 shadow-lg">
-                                <i class="fa-solid fa-file-zipper mr-2"></i> File ZIP
-                            </div>
                         </div>
 
-                        <!-- Content Section -->
                         <div class="p-8 md:p-10 md:w-7/12 flex flex-col bg-card">
-                            <div class="flex justify-between items-start mb-4">
-                                <h1 class="text-3xl md:text-4xl font-bold text-white leading-tight">${script.title}</h1>
-                                ${appState.currentUser && (appState.currentUser.role === 'andri' || appState.currentUser.username === script.author) ? `
-                                    <button onclick="deleteScript('${script.id}'); navigate('home');" class="text-red-500 hover:bg-red-500/20 p-3 rounded-xl transition-colors bg-dark" title="Hapus Script">
-                                        <i class="fa-solid fa-trash"></i>
-                                    </button>
-                                ` : ''}
-                            </div>
+                            <h1 class="text-3xl md:text-4xl font-bold text-white leading-tight mb-4">${script.title}</h1>
                             
                             <div class="flex flex-wrap items-center text-sm text-gray-400 mb-8 gap-4 border-b border-gray-700 pb-6">
-                                <span class="flex items-center bg-dark px-3 py-1.5 rounded-full border border-gray-700"><img src="https://ui-avatars.com/api/?name=${script.author}&background=0D8ABC&color=fff&size=20" class="rounded-full mr-2 text-primary"> ${script.author}</span>
+                                <span class="flex items-center"><i class="fa-solid fa-user text-primary mr-2"></i> ${script.author}</span>
                                 <span class="flex items-center"><i class="fa-regular fa-calendar text-primary mr-2"></i> ${formatDate(script.created_at)}</span>
-                                <span class="flex items-center" title="Total Tayangan"><i class="fa-solid fa-eye text-primary/70 mr-2"></i> ${script.views || 0} Dilihat</span>
+                                <span class="flex items-center"><i class="fa-solid fa-eye text-primary/70 mr-2"></i> ${script.views || 0} Dilihat</span>
                             </div>
                             
-                            <h3 class="text-lg font-bold mb-3 text-primary uppercase tracking-wider text-sm"><i class="fa-solid fa-align-left mr-2"></i>Deskripsi Script</h3>
+                            <h3 class="text-lg font-bold mb-3 text-primary uppercase text-sm">Deskripsi</h3>
                             <div class="text-gray-300 leading-relaxed mb-10 whitespace-pre-wrap bg-dark p-6 rounded-xl border border-gray-800 flex-grow">${script.description}</div>
                             
                             <div class="mt-auto">
-                                <div class="bg-blue-500/10 border border-blue-500/20 p-4 rounded-xl mb-6 flex items-start">
-                                    <i class="fa-solid fa-shield-check text-blue-400 mt-1 mr-3 text-lg"></i>
-                                    <div class="text-sm text-blue-200">
-                                        <p class="font-bold mb-1">Informasi Unduhan</p>
-                                        <p class="opacity-80">Anda akan diarahkan ke halaman pihak ketiga MediaFire untuk mengunduh file.zip ini.</p>
-                                    </div>
-                                </div>
-
-                                <button onclick="downloadScript('${script.id}')" class="w-full bg-primary text-slate-900 font-bold py-4 px-6 rounded-xl hover:bg-sky-300 transition-all active:scale-[0.98] shadow-[0_0_20px_rgba(135,206,235,0.3)] hover:shadow-[0_0_30px_rgba(135,206,235,0.5)] flex justify-center items-center text-lg">
-                                    <i class="fa-solid fa-cloud-arrow-down mr-3 text-2xl"></i> Unduh File ZIP <span class="ml-2 opacity-70 text-sm font-medium border-l border-slate-900/20 pl-2">Telah diunduh ${script.downloads || 0}x</span>
+                                <button onclick="downloadScript('${script.id}')" class="w-full bg-primary text-slate-900 font-bold py-4 px-6 rounded-xl hover:bg-sky-300 transition-all shadow-[0_0_20px_rgba(135,206,235,0.3)] flex justify-center items-center text-lg">
+                                    <i class="fa-solid fa-cloud-arrow-down mr-3 text-2xl"></i> Unduh File ZIP <span class="ml-2 opacity-70 text-sm font-medium border-l border-slate-900/20 pl-2">Diunduh ${script.downloads || 0}x</span>
                                 </button>
                             </div>
                         </div>
@@ -836,9 +824,9 @@
             `;
         }
 
-        // Start Auth process which triggers the app
+        // Start Auth process
         initAuth();
 
     </script>
 </body>
-</html>
+</html>                    
