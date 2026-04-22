@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
@@ -188,7 +188,7 @@
         import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, onSnapshot, doc, setDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Konfigurasi Firebase milik Anda (sc-free-bot)
+        // Konfigurasi Firebase Anda
         const firebaseConfig = {
             apiKey: "AIzaSyA6vwKHbFFtNAcsHxXc3LV5JJtwYqCA7Kk",
             authDomain: "sc-free-bot.firebaseapp.com",
@@ -202,7 +202,7 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const appId = 'wabot-hub-app'; // Menggunakan ID environment untuk routing koleksi
+        const appId = 'wabot-hub-app';
 
         // Global State
         let appState = {
@@ -214,19 +214,16 @@
             isReady: false
         };
 
-        // DOM Elements
         const container = document.getElementById('app-container');
         const navMenu = document.getElementById('nav-menu');
         const mobileNavMenu = document.getElementById('mobile-nav-menu');
         const mobileMenuBtn = document.getElementById('mobile-menu-btn');
         const mobileMenu = document.getElementById('mobile-menu');
 
-        // Toggle Mobile Menu
         mobileMenuBtn.addEventListener('click', () => {
             mobileMenu.classList.toggle('hidden');
         });
 
-        // Initialize Authentication (Anonymous untuk tamu agar bisa baca database Firestore)
         const initAuth = async () => {
             try {
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
@@ -240,7 +237,6 @@
             }
         };
 
-        // Listen for Auth State
         onAuthStateChanged(auth, (user) => {
             if (user && !appState.isReady) {
                 appState.isReady = true;
@@ -248,25 +244,20 @@
             }
         });
 
-        // Setup Database Listeners
         function setupRealtimeListeners() {
             const scriptsRef = collection(db, 'artifacts', appId, 'public', 'data', 'scripts');
             const usersRef = collection(db, 'artifacts', appId, 'public', 'data', 'users');
 
-            // Listen to Scripts
             onSnapshot(scriptsRef, (snapshot) => {
                 appState.scripts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 render();
             }, (error) => {
                 console.error("Error fetching scripts:", error);
-                // Matikan notifikasi error sementara jika database kosong / rules belum diatur
             });
 
-            // Listen to Users (Simulasi User Custom)
             onSnapshot(usersRef, (snapshot) => {
                 appState.users = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 
-                // Check if current session user still exists
                 if (appState.currentUser) {
                     const exists = appState.users.find(u => u.username === appState.currentUser.username);
                     if (!exists) appState.currentUser = null;
@@ -277,17 +268,14 @@
             });
         }
 
-        // Generate UUID
         function generateId() {
             return 'id_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
         }
 
-        // --- Core App Functions ---
-
         window.navigate = (view, data = null) => {
             appState.view = view;
             if (data) appState.currentData = data;
-            mobileMenu.classList.add('hidden'); // hide mobile menu on navigation
+            mobileMenu.classList.add('hidden'); 
             render();
             window.scrollTo(0,0);
         };
@@ -363,8 +351,13 @@
             const form = e.target;
             const title = form.title.value;
             const description = form.description.value;
-            const image = form.image.value || "https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"; // Fallback image
-            const download_link = form.download_link.value;
+            const image = form.image.value || "https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"; 
+            let download_link = form.download_link.value;
+            
+            // Perbaiki link jika tidak mengandung protokol http
+            if (!download_link.startsWith('http://') && !download_link.startsWith('https://')) {
+                download_link = 'https://' + download_link;
+            }
 
             try {
                 const scriptsRef = collection(db, 'artifacts', appId, 'public', 'data', 'scripts');
@@ -401,7 +394,6 @@
             }
         };
 
-        // Proteksi Guest untuk melihat detail
         window.viewScriptDetails = async (id) => {
             if (!appState.currentUser) {
                 showMessage("Akses Ditolak! Anda harus Login atau Daftar untuk melihat detail & mengunduh.", "error");
@@ -424,7 +416,7 @@
             navigate('details', script);
         };
 
-        // Proteksi Download
+        // --- UPDATE PENTING: FIX MASALAH DOWNLOAD TAB PIHAK KETIGA ---
         window.downloadScript = async (id) => {
             if (!appState.currentUser) {
                 showMessage("Sesi Anda telah habis. Silakan login kembali.", "error");
@@ -434,20 +426,42 @@
 
             const script = appState.scripts.find(s => s.id === id);
             if (!script) return;
-
-            try {
-                const scriptsRef = collection(db, 'artifacts', appId, 'public', 'data', 'scripts');
-                await updateDoc(doc(scriptsRef, id), {
-                    downloads: script.downloads + 1
-                });
-            } catch (e) { console.error("Update download error:", e); }
+            
+            const linkDownload = script.download_link;
+            if(!linkDownload){
+                showMessage("Link unduhan tidak valid atau kosong.", "error");
+                return;
+            }
 
             showMessage("Mengarahkan ke halaman unduhan...", "success");
             
-            setTimeout(() => {
-                window.open(script.download_link, '_blank');
+            // EKSEKUSI SINKRON: Buat tag <a> virtual dan klik secara otomatis untuk memintas popup blocker
+            try {
+                const a = document.createElement('a');
+                a.href = linkDownload;
+                a.target = '_blank';
+                a.rel = 'noopener noreferrer';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            } catch(e) {
+                // Fallback jika pembuatan dom dilarang (meskipun jarang terjadi)
+                window.open(linkDownload, '_blank');
+            }
+
+            // PROSES DATABASE: Update angka counter download di background
+            try {
+                const scriptsRef = collection(db, 'artifacts', appId, 'public', 'data', 'scripts');
+                await updateDoc(doc(scriptsRef, id), {
+                    downloads: (script.downloads || 0) + 1
+                });
+                
+                // Update tampilan angka di layar tanpa perlu refresh full
+                script.downloads = (script.downloads || 0) + 1;
                 render();
-            }, 800);
+            } catch (e) { 
+                console.error("Update download error:", e); 
+            }
         };
 
         function formatDate(dateString) {
@@ -455,7 +469,6 @@
             return new Date(dateString).toLocaleDateString('id-ID', options);
         }
 
-        // Notifikasi Message Box
         let msgTimeout;
         window.showMessage = (text, type = "info") => {
             const box = document.getElementById('msg-box');
@@ -829,4 +842,4 @@
 
     </script>
 </body>
-</html>                    
+</html>
